@@ -22,6 +22,7 @@ Example of classification, priority assignment, and generated response.
 
 ## Repository Structure
 
+```
 main_repository/
 │
 ├── assets/
@@ -31,6 +32,7 @@ main_repository/
 ├── app.py
 ├── LICENSE
 └── README.md
+```
 
 ---
 
