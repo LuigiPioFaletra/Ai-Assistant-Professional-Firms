@@ -1,0 +1,118 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "21c8e280-72d0-4bf6-b1d1-c4d2d21b0f91",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1ef09f0f-fcbc-463e-8368-e172eccf8066",
+              "name": "document_text",
+              "value": "PEC ricevuta da Agenzia Entrate. Richiesta integrazione documentale entro 15 giorni. Cliente: Mario Rossi. Protocollo 12345.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "4bd9797c-1f48-4e8f-8e8e-c3b67355dd0a",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:11434/api/generate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"qwen2.5:1.5b\",\n  \"prompt\": \"Analizza questo documento e restituisci SOLO JSON con: tipo_documento, ente_mittente, cliente, protocollo, scadenza, azione_richiesta.\\n\\nDocumento: {{$json.document_text}}\",\n  \"stream\": false\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "944cd215-216c-460a-88eb-f5934df9e7a5",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "let raw = $json.response;\n\n// Rimuove ```json e ```\nraw = raw\n  .replace(/```json\\s*/i, '')\n  .replace(/```/g, '')\n  .trim();\n\n// Debug opzionale\nconsole.log(raw);\n\n// Parse JSON\nconst parsed = JSON.parse(raw);\n\nreturn [\n  {\n    json: parsed\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        0
+      ],
+      "id": "be36eb5c-e606-48ae-bdb0-c147d62c0a25",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "591882bd-fee5-4584-ac8a-87e3a4dc783b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9a7b625f9378574e236346013155a694d78daf877d6857a77f2355e7392a30af"
+  },
+  "id": "izPHMXbgz9vcmTgg",
+  "tags": []
+}
